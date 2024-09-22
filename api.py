@@ -126,7 +126,7 @@ def makeDictItem(item):
     elif item.rotation_type == 5:
         pos = (int(item.position[0]) + int(item.width)//2,int(item.position[1])+ int(item.depth)//2,int(item.position[2])+ int(item.height)//2)
         whd = (int(item.width),int(item.depth),int(item.height))
-    
+
     r = {
         "partNumber" : item.partno,
         "name" : item.name,

@@ -4,9 +4,10 @@ dist
 *.egg-info
 .pypirc
 .vscode
-venv
+.venv
 test
 setup.py
 venv
 debug.log
 test*
+.env
