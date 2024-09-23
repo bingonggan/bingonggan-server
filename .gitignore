@@ -11,3 +11,4 @@ venv
 debug.log
 test*
 .env
+example.json

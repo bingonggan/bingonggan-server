@@ -1,10 +1,11 @@
 import os
-import math
+import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from py3dbp import Packer, Bin, Item
+import constants
 
 load_dotenv()
 
@@ -12,7 +13,7 @@ class Req(BaseModel):
   items: list
 
 class Res(BaseModel):
-  box_size: list
+  result: list
 
 app = FastAPI()
 
@@ -28,61 +29,99 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/", response_model=Req)
+@app.post("/", response_model=Res)
 async def root(req: Req):
-  print(calculate_boxSize(req.items))
-  return req
+  if len(req.items) == 0:
+    return HTTPException(status_code=400, detail="아이템이 없습니다.")
+  return {"result": get_res(req.items)}
 
 
-def get_box_and_item(items):
+def get_res(req_items):
+  res_list = []
+  BOX_MAX_SIZE = len(constants.box_size) - 1
+
+  items = get_items(req_items)
+
+  def get_item_info(items):
+    size = 0
+
+    while check_box_sizes(items, size) and size <= BOX_MAX_SIZE:
+      size += 1
+      if size > BOX_MAX_SIZE:
+        items = check_box_sizes(items, size-1)
+        get_item_info(items)
+        size -= 1
+
+    packer = pack_box(items, size)
+
+    for box in packer.bins:
+      req_item = {}
+      req_item["boxSize"] = (box.partno, [int(box.width), int(box.height), int(box.depth)])
+      req_item["itemList"] = []
+
+      for item in box.items:
+        req_item["itemList"].append({
+          "itemTitle": item.name,
+          "itemWHD": [int(item.width), int(item.height), int(item.depth)],
+          "position": list(map(int, item.position)),
+          "rotationType": item.rotation_type,
+        })
+
+      res_list.append(req_item)
+
+  get_item_info(items)
+
+  return res_list
+
+def pack_box(items, size):
   packer = Packer()
 
-  box = Bin(
-    partno="box",
-    WHD=calculate_boxSize(items)[1],
+  packer.addBin(Bin(
+    partno=constants.box_size[size][0],
+    WHD=constants.box_size[size][1],
     max_weight=16,
-  )
+  ))
 
-  packer.addBin(box)
-
-  for item in get_items(items):
+  for item in items:
     packer.addItem(item)
 
   packer.pack(
     bigger_first=True,
     fix_point=True,
-    distribute_items=False,
+    distribute_items=True,
     check_stable=False,
     support_surface_ratio=0.5,
     number_of_decimals=0
   )
 
-def calculate_boxSize(items):
-  box_volume = 0
+  return packer
+
+def check_box_sizes(items, size):
+  packer = Packer()
+
+  packer.addBin(Bin(
+    partno=constants.box_size[size][0],
+    WHD=constants.box_size[size][1],
+    max_weight=16,
+  ))
 
   for item in items:
-    box_volume += item["itemX"] * item["itemY"] * item["itemZ"]
+    packer.addItem(item)
 
-  box_len = math.ceil(box_volume**(1/3))
+  packer.pack(
+    bigger_first=True,
+    fix_point=True,
+    distribute_items=True,
+    check_stable=False,
+    support_surface_ratio=0.5,
+    number_of_decimals=0
+  )
 
-  if box_volume <= 3762000:
-    return "1호", [220, 190, 90]
-  elif box_volume <= 7290000:
-    return "2호", [270, 180, 150]
-  elif box_volume <= 875000:
-    return "2-1호", [350, 250, 100]
-  elif box_volume <= 17850000:
-    return "3호", [340, 250, 210]
-  elif box_volume <= 35588000:
-    return "4호", [410, 310, 280]
-  elif box_volume <= 38304000:
-    return "5-1호", [480, 380, 210]
-  elif box_volume <= 62016000:
-    return "5호", [480, 380, 340]
-  elif box_volume <= 99840000:
-    return "6호", [520, 480, 400]
-  else:
-    return "커스텀 상자", [box_len, box_len, box_len]
+  for box in packer.bins:
+    if len(box.unfitted_items) > 0:
+      return box.unfitted_items
+    else:
+      return False
 
 def get_items(items):
   packer_items = []
@@ -92,10 +131,10 @@ def get_items(items):
       partno=i,
       name=item["itemTitle"],
       typeof="cube",
-      WHD=(item["itemX"], item["itemY"], item["itemZ"]),
+      WHD=(item["itemW"], item["itemH"], item["itemD"]),
       weight=1,
       level=1,
-      loadbear=1,
+      loadbear=100,
       updown=True,
       color="r",
     )
@@ -104,3 +143,5 @@ def get_items(items):
 
   return packer_items
 
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
