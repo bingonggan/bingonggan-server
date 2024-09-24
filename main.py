@@ -32,7 +32,7 @@ app.add_middleware(
 @app.post("/", response_model=Res)
 async def root(req: Req):
   if len(req.items) == 0:
-    return HTTPException(status_code=400, detail="아이템이 없습니다.")
+    raise HTTPException(status_code=400, detail="아이템이 없습니다.")
   return {"result": get_res(req.items)}
 
 
@@ -60,9 +60,17 @@ def get_res(req_items):
       req_item["itemList"] = []
 
       for item in box.items:
+        if item.rotation_type == 1:
+          item.position = [item.position[0], item.position[1] + item.height, item.position[2]]
+        if item.rotation_type == 2:
+          item.position = [item.position[0], item.position[1] + item.depth, item.position[2] + item.width]
+        if item.rotation_type == 3:
+          item.position = [item.position[0], item.position[1], item.position[2] + item.width]
+        if item.rotation_type == 5:
+          item.position = [item.position[0], item.position[1] + item.depth, item.position[2]]
         req_item["itemList"].append({
-          "itemTitle": item.name,
-          "itemWHD": [int(item.width), int(item.height), int(item.depth)],
+          "itemName": item.name,
+          "itemScale": item.partno,
           "position": list(map(int, item.position)),
           "rotationType": item.rotation_type,
         })
@@ -126,10 +134,10 @@ def check_box_sizes(items, size):
 def get_items(items):
   packer_items = []
 
-  for i, item in enumerate(items):
+  for item in items:
     packer_item = Item(
-      partno=i,
-      name=item["itemTitle"],
+      partno=(item["itemScaleX"], item["itemScaleY"], item["itemScaleZ"]),
+      name=item["itemName"],
       typeof="cube",
       WHD=(item["itemW"], item["itemH"], item["itemD"]),
       weight=1,
