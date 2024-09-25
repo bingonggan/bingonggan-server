@@ -61,7 +61,7 @@ def get_res(req_items):
 
       for item in box.items:
         if item.rotation_type == 1:
-          item.position = [item.position[0], item.position[1] + item.height, item.position[2]]
+          item.position = [item.position[0] + item.height, item.position[1], item.position[2]]
         if item.rotation_type == 2:
           item.position = [item.position[0], item.position[1] + item.depth, item.position[2] + item.width]
         if item.rotation_type == 3:
