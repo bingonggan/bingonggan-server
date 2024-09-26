@@ -29,8 +29,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/", response_model=Res)
-async def root(req: Req):
+@app.get("/")
+async def root():
+  return {"result": "success"}
+
+@app.post("/packing", response_model=Res)
+async def get_res(req: Req):
   if len(req.items) == 0:
     raise HTTPException(status_code=400, detail="아이템이 없습니다.")
   return {"result": get_res(req.items)}
