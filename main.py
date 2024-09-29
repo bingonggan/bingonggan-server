@@ -31,10 +31,11 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-  return {"result": "success"}
+  return {"message": "success"}
 
 @app.post("/packing", response_model=Res)
 async def get_res(req: Req):
+  print(req.items)
   if len(req.items) == 0:
     raise HTTPException(status_code=400, detail="아이템이 없습니다.")
   return {"result": get_res(req.items)}
@@ -73,7 +74,8 @@ def get_res(req_items):
         if item.rotation_type == 5:
           item.position = [item.position[0], item.position[1] + item.depth, item.position[2]]
         req_item["itemList"].append({
-          "itemName": item.name,
+          "itemName": item.name["item_name"],
+          "itemIndex": item.name["item_index"],
           "itemScale": item.partno,
           "position": list(map(int, item.position)),
           "rotationType": item.rotation_type,
@@ -141,7 +143,7 @@ def get_items(items):
   for item in items:
     packer_item = Item(
       partno=(item["itemScaleX"], item["itemScaleY"], item["itemScaleZ"]),
-      name=item["itemName"],
+      name={"item_name": item["itemName"], "item_index": item["itemIndex"]},
       typeof="cube",
       WHD=(item["itemW"], item["itemH"], item["itemD"]),
       weight=1,
