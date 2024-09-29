@@ -35,7 +35,6 @@ async def root():
 
 @app.post("/packing", response_model=Res)
 async def get_res(req: Req):
-  print(req.items)
   if len(req.items) == 0:
     raise HTTPException(status_code=400, detail="아이템이 없습니다.")
   return {"result": get_res(req.items)}
