@@ -35,6 +35,7 @@ async def root():
 
 @app.post("/packing", response_model=Res)
 async def get_res(req: Req):
+  print(req.items)
   if len(req.items) == 0:
     raise HTTPException(status_code=400, detail="아이템이 없습니다.")
   return {"result": get_res(req.items)}
@@ -121,14 +122,17 @@ def check_box_sizes(items, size):
   for item in items:
     packer.addItem(item)
 
-  packer.pack(
-    bigger_first=True,
-    fix_point=True,
-    distribute_items=True,
-    check_stable=False,
-    support_surface_ratio=0.5,
-    number_of_decimals=0
-  )
+  try:
+    packer.pack(
+      bigger_first=True,
+      fix_point=True,
+      distribute_items=True,
+      check_stable=False,
+      support_surface_ratio=0.5,
+      number_of_decimals=0
+    )
+  except ZeroDivisionError:
+    return True
 
   for box in packer.bins:
     if len(box.unfitted_items) > 0:
