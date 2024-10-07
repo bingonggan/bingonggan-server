@@ -8,16 +8,19 @@ def get_res(req_items):
     items = get_items(req_items)
 
     def get_item_info(items):
+        item_list = items
         size = 0
 
-        while check_box_sizes(items, size) and size <= BOX_MAX_SIZE:
+        while check_box_sizes(item_list, size) and size <= BOX_MAX_SIZE:
             size += 1
             if size > BOX_MAX_SIZE:
-                items = check_box_sizes(items, size - 1)
-                get_item_info(items)
+                unfitted_items = check_box_sizes(item_list, size - 1)
+                get_item_info(unfitted_items)
+                for item in unfitted_items:
+                    item_list.remove(item)
                 size -= 1
 
-        packer = pack_box(items, size)
+        packer = pack_box(item_list, size)
 
         for box in packer.bins:
             req_item = {}
