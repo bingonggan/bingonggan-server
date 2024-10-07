@@ -143,7 +143,7 @@ def get_items(items):
             WHD=(item["itemW"], item["itemH"], item["itemD"]),
             weight=1,
             level=1,
-            loadbear=100,
+            loadbear=item["loadBear"],
             updown=True,
             color="r",
         )
