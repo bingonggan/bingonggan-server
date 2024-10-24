@@ -3,7 +3,7 @@ import constants
 
 def get_res(req_items):
     res_list = []
-    BOX_MAX_SIZE = len(constants.BOX_SIZE) - 1
+    box_max_size = len(constants.BOX_SIZE) - 1
 
     items = get_items(req_items)
 
@@ -11,9 +11,9 @@ def get_res(req_items):
         item_list = items
         size = 0
 
-        while check_box_sizes(item_list, size) and size <= BOX_MAX_SIZE:
+        while check_box_sizes(item_list, size) and size <= box_max_size:
             size += 1
-            if size > BOX_MAX_SIZE:
+            if size > box_max_size:
                 unfitted_items = check_box_sizes(item_list, size - 1)
                 get_item_info(unfitted_items)
                 for item in unfitted_items:
@@ -23,12 +23,10 @@ def get_res(req_items):
         packer = pack_box(item_list, size)
 
         for box in packer.bins:
-            req_item = {}
-            req_item["boxSize"] = (
+            req_item = {"boxSize": (
                 box.partno,
                 [int(box.width), int(box.height), int(box.depth)],
-            )
-            req_item["itemList"] = []
+            ), "itemList": []}
 
             for item in box.items:
                 if item.rotation_type == 1:
