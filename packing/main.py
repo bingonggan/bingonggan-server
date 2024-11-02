@@ -1,6 +1,7 @@
 from py3dbp import Packer, Bin, Item
 import constants
 
+
 def get_res(req_items):
     res_list = []
     box_max_size = len(constants.BOX_SIZE) - 1
@@ -11,55 +12,39 @@ def get_res(req_items):
         item_list = items
         size = 0
 
-        while check_box_sizes(item_list, size) and size <= box_max_size:
+        while True:
+            unfitted_items = check_box_sizes(item_list, size)
+
+            if not unfitted_items:
+                break
+
             size += 1
+
             if size > box_max_size:
-                unfitted_items = check_box_sizes(item_list, size - 1)
                 get_item_info(unfitted_items)
                 for item in unfitted_items:
                     item_list.remove(item)
                 size -= 1
+                break
 
         packer = pack_box(item_list, size)
 
         for box in packer.bins:
-            req_item = {"boxSize": (
-                box.partno,
-                [int(box.width), int(box.height), int(box.depth)],
-            ), "itemList": []}
+            req_item = {
+                "boxSize": (
+                    box.partno,
+                    [int(box.width), int(box.height), int(box.depth)],
+                ),
+                "itemList": [],
+            }
 
             for item in box.items:
-                if item.rotation_type == 1:
-                    item.position = [
-                        item.position[0] + item.height,
-                        item.position[1],
-                        item.position[2],
-                    ]
-                if item.rotation_type == 2:
-                    item.position = [
-                        item.position[0],
-                        item.position[1] + item.depth,
-                        item.position[2] + item.width,
-                    ]
-                if item.rotation_type == 3:
-                    item.position = [
-                        item.position[0],
-                        item.position[1],
-                        item.position[2] + item.width,
-                    ]
-                if item.rotation_type == 5:
-                    item.position = [
-                        item.position[0],
-                        item.position[1] + item.depth,
-                        item.position[2],
-                    ]
-
                 req_item["itemList"].append(
                     {
                         "itemName": item.name["item_name"],
                         "itemIndex": item.name["item_index"],
                         "itemScale": item.partno,
-                        "position": list(map(int, item.position)),
+                        "position": calculate_position(item),
                         "rotationType": item.rotation_type,
                     }
                 )
@@ -69,6 +54,35 @@ def get_res(req_items):
     get_item_info(items)
 
     return res_list
+
+
+def calculate_position(item):
+    if item.rotation_type == 1:
+        item.position = [
+            item.position[0] + item.height,
+            item.position[1],
+            item.position[2],
+        ]
+    if item.rotation_type == 2:
+        item.position = [
+            item.position[0],
+            item.position[1] + item.depth,
+            item.position[2] + item.width,
+        ]
+    if item.rotation_type == 3:
+        item.position = [
+            item.position[0],
+            item.position[1],
+            item.position[2] + item.width,
+        ]
+    if item.rotation_type == 5:
+        item.position = [
+            item.position[0],
+            item.position[1] + item.depth,
+            item.position[2],
+        ]
+
+    return list(map(int, item.position))
 
 
 def pack_box(items, size):
