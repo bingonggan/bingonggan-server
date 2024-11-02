@@ -39,7 +39,14 @@ async def root():
 async def packing(req: Req):
     if len(req.items) == 0:
         raise HTTPException(status_code=400, detail="아이템이 없습니다.")
-    return {"result": get_res(req.items)}
+    if len(req.items) > 15:
+        raise HTTPException(
+            status_code=400, detail="아이템 개수는 15개를 넘을 수 없습니다"
+        )
+
+    response = get_res(req.items)
+    return {"result": response}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
