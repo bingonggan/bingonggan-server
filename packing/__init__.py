@@ -1,1 +1,1 @@
-from .main import get_res
+from .main import get_packed_item_list

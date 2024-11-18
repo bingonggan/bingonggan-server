@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from packing import get_res
+from packing import get_packed_item_list
 
 load_dotenv()
 
@@ -44,7 +44,7 @@ async def packing(req: Req):
             status_code=400, detail="아이템 개수는 15개를 넘을 수 없습니다"
         )
 
-    response = get_res(req.items)
+    response = get_packed_item_list(req.items)
     return {"result": response}
 
 

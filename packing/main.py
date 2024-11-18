@@ -2,11 +2,11 @@ from py3dbp import Packer, Bin, Item
 import constants
 
 
-def get_res(req_items):
-    res_list = []
+def get_packed_item_list(item_list):
+    packed_item_list = []
     box_max_size = len(constants.BOX_SIZE) - 1
 
-    items = get_items(req_items)
+    items = get_items(item_list)
 
     def get_item_info(items):
         item_list = items
@@ -49,11 +49,11 @@ def get_res(req_items):
                     }
                 )
 
-            res_list.append(req_item)
+            packed_item_list.append(req_item)
 
     get_item_info(items)
 
-    return res_list
+    return packed_item_list
 
 
 def calculate_position(item):
