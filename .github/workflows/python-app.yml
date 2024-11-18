@@ -33,3 +33,19 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
+
+      - name: Get current time
+        id: get-time
+        run: echo "time=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+      - name: Generate deployment package
+        run: git archive --format=zip main -o deploy.zip
+      - name: Beanstalk Deploy
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: bingonggan-server
+          environment_name: bingonggan-server-dev
+          version_label: "github-action-${{ env.time }}"
+          region: ap-northeast-2
+          deployment_package: deploy.zip
