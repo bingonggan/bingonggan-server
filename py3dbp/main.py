@@ -509,7 +509,7 @@ class Packer:
                     y = len(y_set & area[j][1]) / (y_ed - y_st) * int(i.weight)
                     area[j][2] += y
                     if j >= 2 :
-                        area[j-2][2] += (int(i.weight) - x)
+                        area[j-2][2] += (int(i.weight) - y)
                     else :
                         area[j+2][2] += (int(i.weight) - y)
                     break
