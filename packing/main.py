@@ -149,13 +149,13 @@ def get_items(items):
 
     for item in items:
         packer_item = Item(
-            partno=(item["itemScaleX"], item["itemScaleY"], item["itemScaleZ"]),
-            name={"item_name": item["itemName"], "item_index": item["itemIndex"]},
+            partno=(item.itemScaleX, item.itemScaleY, item.itemScaleZ),
+            name={"item_name": item.itemName, "item_index": item.itemIndex},
             typeof="cube",
-            WHD=(item["itemW"], item["itemH"], item["itemD"]),
+            WHD=(item.itemW, item.itemH, item.itemD),
             weight=1,
             level=1,
-            loadbear=item["loadBear"],
+            loadbear=item.loadBear,
             updown=True,
             color="r",
         )

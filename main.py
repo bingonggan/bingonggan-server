@@ -5,16 +5,42 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from packing import get_packed_item_list
+from typing import List, Tuple
 
 load_dotenv()
 
 
+class ReqItem(BaseModel):
+    itemName: str
+    itemIndex: int
+    itemScaleX: int
+    itemScaleY: int
+    itemScaleZ: int
+    itemW: int
+    itemH: int
+    itemD: int
+    loadBear: int
+
+
 class Req(BaseModel):
-    items: list
+    items: List[ReqItem]
+
+
+class ResItem(BaseModel):
+    itemName: str
+    itemIndex: int
+    itemScale: List[int]
+    position: List[int]
+    rotationType: int
+
+
+class result(BaseModel):
+    boxSize: Tuple[str, Tuple[int, int, int]]
+    itemList: List[ResItem]
 
 
 class Res(BaseModel):
-    result: list
+    result: List[result]
 
 
 app = FastAPI()
