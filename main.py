@@ -13,12 +13,12 @@ load_dotenv()
 class ReqItem(BaseModel):
     itemName: str
     itemIndex: int
-    itemScaleX: int
-    itemScaleY: int
-    itemScaleZ: int
-    itemW: int
-    itemH: int
-    itemD: int
+    itemScaleX: float
+    itemScaleY: float
+    itemScaleZ: float
+    itemW: float
+    itemH: float
+    itemD: float
     loadBear: int
 
 
@@ -29,8 +29,8 @@ class Req(BaseModel):
 class ResItem(BaseModel):
     itemName: str
     itemIndex: int
-    itemScale: List[int]
-    position: List[int]
+    itemScale: List[float]
+    position: List[float]
     rotationType: int
 
 
