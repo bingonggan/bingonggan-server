@@ -61,7 +61,7 @@ async def root():
     return {"message": "success"}
 
 
-@app.post("/packing", response_model=Res)
+@app.post("/api/packed-items", response_model=Res)
 async def packing(req: Req):
     if len(req.items) == 0:
         raise HTTPException(status_code=400, detail="아이템이 없습니다.")
